@@ -7,6 +7,8 @@ def load_pd_dataframe(path: str) -> pd.DataFrame:
     df = pd.read_csv(path, sep='\t', header=0)
     if 'label' in df.columns:
         df['label'] = (df['label'] == 'OFF').astype(int)
+    else:
+        df['label'] = 0
     return df
 
 
