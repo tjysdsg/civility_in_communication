@@ -1,67 +1,44 @@
-import pandas as pd
-from datasets import Dataset
-from data import load_train_df, load_dev_df, load_test_df, df2dataset
-import evaluate
-from transformers import AutoTokenizer, RobertaForSequenceClassification, DataCollatorWithPadding, TrainingArguments, \
-    Trainer
-import numpy as np
-
-
-def tokenize_dataset(data: Dataset, tokenizer):
-    return data.map(lambda x: tokenizer(x["text"], truncation=True), batched=True)
-
-
-def preprocess(df: pd.DataFrame):
-    df['label'] = (df['label'] == 'OFF').astype(int)
-    return df
+from data import load_train_df, load_dev_df, load_demographic_dev_df
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics import classification_report
+from sklearn.linear_model import LogisticRegression
 
 
 def train():
-    train_set = df2dataset(preprocess(load_train_df()))
-    dev_set = df2dataset(preprocess(load_dev_df()))
+    tfidf = TfidfVectorizer(min_df=10)
 
-    tokenizer = AutoTokenizer.from_pretrained("roberta-base")
-    model = RobertaForSequenceClassification.from_pretrained(
-        "roberta-base",
-        num_labels=2,
-    ).to('cuda')
+    train_set = load_train_df()
+    x_train = tfidf.fit_transform(train_set['text']).toarray()
+    y_train = train_set['label']
 
-    train_set = tokenize_dataset(train_set, tokenizer)
-    dev_set = tokenize_dataset(dev_set, tokenizer)
+    dev_set = load_dev_df()
+    x_dev = tfidf.transform(dev_set['text']).toarray()
+    y_dev = dev_set['label']
 
-    collator = DataCollatorWithPadding(tokenizer=tokenizer, padding=True)
+    model = LogisticRegression()
+    model.fit(x_train, y_train)
+    y_pred = model.predict(x_dev)
 
-    accuracy = evaluate.load("accuracy")
+    print(classification_report(y_dev, y_pred))
+    """
+                      precision    recall  f1-score   support
+    
+               0       0.76      0.94      0.84       884
+               1       0.78      0.39      0.52       440
+    
+        accuracy                           0.76      1324
+       macro avg       0.77      0.67      0.68      1324
+    weighted avg       0.76      0.76      0.73      1324
+    """
 
-    def compute_metrics(eval_pred):
-        predictions, labels = eval_pred
-        predictions = np.argmax(predictions, axis=1)
-        return accuracy.compute(predictions=predictions, references=labels)
+    demo_set = load_demographic_dev_df()
+    x_demo = tfidf.transform(demo_set['text']).toarray()
+    y_pred = model.predict(x_demo)
 
-    training_args = TrainingArguments(
-        output_dir="exp",
-        learning_rate=2e-5,
-        per_device_train_batch_size=16,
-        per_device_eval_batch_size=16,
-        num_train_epochs=10,
-        weight_decay=0.01,
-        evaluation_strategy="epoch",
-        save_strategy="epoch",
-        load_best_model_at_end=True,
-        report_to='none',
-    )
-
-    trainer = Trainer(
-        model=model,
-        args=training_args,
-        train_dataset=train_set,
-        eval_dataset=dev_set,
-        tokenizer=tokenizer,
-        data_collator=collator,
-        compute_metrics=compute_metrics,
-    )
-
-    trainer.train()
+    fp = y_pred.sum()
+    tn = len(y_pred) - fp
+    print('FPR:', fp / (fp + tn))
+    # FPR: 0.11139589905362776
 
 
 def main():

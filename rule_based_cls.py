@@ -4,18 +4,16 @@ from sklearn.metrics import classification_report, accuracy_score
 
 def main():
     df = load_dev_df()
-    df['gt'] = (df['label'] == 'OFF').astype(int)
-    df = df[['perspective_score', 'gt']]
     df['pred'] = (df['perspective_score'] > 0.8).astype(int)
 
     print('\nDEV SET')
     print(
-        classification_report(df['gt'], df['pred'])
+        classification_report(df['label'], df['pred'])
     )
-    print('Acc:', accuracy_score(df['gt'], df['pred']))
+    print('Acc:', accuracy_score(df['label'], df['pred']))
 
     df = load_demographic_dev_df()
-    df['gt'] = 0
+    df['label'] = 0
     df['pred'] = (df['perspective_score'] > 0.8).astype(int)
 
     def fpr(pred):
@@ -25,7 +23,7 @@ def main():
 
     # FPR
     print('\nDEOMO GRUOPS OVERALL')
-    print('Acc:', accuracy_score(df['gt'], df['pred']))
+    print('Acc:', accuracy_score(df['label'], df['pred']))
     print(f'FPR: {fpr(df["pred"])}')
 
     # Evaluate for each demo group
@@ -33,7 +31,7 @@ def main():
     demo_groups = ['AA', 'White', 'Hispanic', 'Other']
     for demo in demo_groups:
         d = df[df['demographic'] == demo]
-        print(f'Acc for demo group {demo}:', accuracy_score(df['gt'], df['pred']))
+        print(f'Acc for demo group {demo}:', accuracy_score(df['label'], df['pred']))
         print(f'FPR for demo group {demo}: {fpr(d["pred"])}')
 
 
