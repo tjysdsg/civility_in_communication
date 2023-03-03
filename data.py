@@ -5,6 +5,7 @@ from datasets import Dataset
 
 def load_pd_dataframe(path: str) -> pd.DataFrame:
     df = pd.read_csv(path, sep='\t', header=0)
+    df['gt'] = (df['label'] == 'OFF').astype(int)
     return df
 
 
