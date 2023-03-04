@@ -1,0 +1,134 @@
+% This must be in the first 5 lines to tell arXiv to use pdfLaTeX, which is strongly recommended.
+\pdfoutput=1
+% In particular, the hyperref package requires pdfLaTeX in order to break URLs across lines.
+
+\documentclass[11pt]{article}
+
+% Remove the "review" option to generate the final version.
+% \usepackage[review]{acl}
+\usepackage{acl}
+
+\usepackage{times}
+\usepackage{latexsym}
+
+% For proper rendering and hyphenation of words containing Latin characters (including in bib files)
+\usepackage[T1]{fontenc}
+% For Vietnamese characters
+% \usepackage[T5]{fontenc}
+% See https://www.latex-project.org/help/documentation/encguide.pdf for other character sets
+
+\usepackage[utf8]{inputenc}
+\usepackage{microtype}
+\usepackage{amsmath}
+\usepackage{threeparttable}
+
+% Set the left margin to zero for the quote environment
+\AtBeginEnvironment{quote}{\setlength{\leftmargini}{4pt}}
+
+
+\title{11830 Report: Civility in Communication}
+
+\author{
+    Jiyang Tang \\
+    \texttt{jiyangta@andrew.cmu.edu}
+}
+
+\begin{document}
+    \maketitle
+    % \begin{abstract}
+    % \end{abstract}
+
+
+    \section{Introduction}
+
+    Toxic speech detection using machine learning has been a hot research topic in recent years.
+    In this report, we investigate the methods of performing this task, using data sampled from the SemEval2019
+    challenge~\cite{semeval2019} and TwitterAAE dataset~\cite{twitter_aae}.
+
+
+    \section{Method}
+
+    We build three types of toxic speech classifiers and test their classification performance and the biases
+    on out-of-domain non-toxic data.
+
+    \subsection{PerspectiveAPI-based Classifier}
+
+    We first use PerspectiveAPI to build a rule-based classifier.
+    Perspective score represents the toxicity level of a piece of text.
+    The classifier recognize a sentence as offensive if its Perspective score is larger than $0.8$.
+
+    \subsection{Linear Classifier using Word Count Vectors}
+
+    The second baseline model is a linear classifier using word count feature vectors.
+    The model can recognize offensive words in text, but may fail in other situations.
+
+    \subsection{RoBERTa Sentence Classifier}
+
+    The third classifier is built on top of the RoBERTa~\cite{roberta}.
+    There are several advantages of using RoBERTa.
+    Its text tokenizer uses binary pair encoding (BPE)~\cite{BPE}, which means the model utilize unicode characters such as
+    emojis to perform classification.
+    As a language model, RoBERTa recognizes contextual text information which should in theory improve the
+    classification performance on hard cases.
+    The model is also pre-trained on a large amount of data, so we only need finetune it for a small number
+    of iterations.
+
+
+    \section{Experiments}
+
+    For all three classifiers, we report their F1 score, precision, recall, and accuracy on the development set of
+    SemEval2019 data.
+    And we present their false-positive rate (FPR) on TwitterAAE data average across all demographic groups.
+
+    \subsection{Linear Classifier}
+
+    For the linear classifier, we clean the text before extracting word count features.
+    We use \texttt{spaCy}~\cite{spacy} \texttt{en\_core\_web\_sm} model to tokenize raw strings into
+    lists of lower-case words and remove all punctuations.
+    Then we use \texttt{Ekphrasis}~\cite{ekphrasis} library to normalize the text.
+    \texttt{Ekphrasis} specializes in processing social media text which contains typos, urls, emojis and so on.
+    We use it to normalize such components, unpack hashtags, fix elongated words, and convert emoticons to text.
+    Finally, we use \texttt{sklearn}~\cite{scikit-learn} \texttt{CountVectorizer} to convert text into word count
+    vectors.
+
+    \subsection{RoBERTa Sentence Classifier}
+
+    For the RoBERTa classifier, we feed the text directly to the tokenizer and rely on the model to handle special
+    text components mentioned in the previous section.
+
+
+    \section{Results and Discussion}
+
+    \begin{table*}
+        \small
+        \centering
+        \begin{tabular}{lccccc}
+            \hline
+            Model       & Accuracy & F1 & Precision & Recall & FPR (Demo) \\
+            \hline
+            Perspective &          &    &           &        &            \\\hline
+            Linear      &          &    &           &        &            \\\hline
+            RoBERTa     &          &    &           &        &            \\\hline
+        \end{tabular}
+
+        \caption{Results of three classifiers.}
+        \label{tab:results}
+    \end{table*}
+
+
+    \section{Conclusion}
+
+    In this report, we have created three toxic speech classifiers and analyzed their performance and biases.
+
+    \clearpage
+    \bibliography{anthology,custom}
+    \bibliographystyle{acl_natbib}
+
+    % \appendix
+
+    % \section{Example Appendix}
+    % \label{sec:appendix}
+
+    % This is an appendix.
+
+\end{document}

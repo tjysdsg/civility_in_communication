@@ -22,16 +22,11 @@ def main():
         return fp / (fp + tn)
 
     # FPR
-    print('\nDEOMO GRUOPS OVERALL')
-    print('Acc:', accuracy_score(df['label'], df['pred']))
-    print(f'FPR: {fpr(df["pred"])}')
-
     # Evaluate for each demo group
     print('\nDEOMO GRUOPS')
     demo_groups = ['AA', 'White', 'Hispanic', 'Other']
     for demo in demo_groups:
         d = df[df['demographic'] == demo]
-        print(f'Acc for demo group {demo}:', accuracy_score(df['label'], df['pred']))
         print(f'FPR for demo group {demo}: {fpr(d["pred"])}')
 
 
@@ -47,18 +42,10 @@ def main():
 #
 # Acc: 0.7643504531722054
 #
-# DEOMO GRUOPS OVERALL
-# Acc: 0.9193611987381703
-# FPR: 0.08063880126182965
-#
 # DEOMO GRUOPS
-# Acc for demo group AA: 0.9193611987381703
 # FPR for demo group AA: 0.1897590361445783
-# Acc for demo group White: 0.9193611987381703
 # FPR for demo group White: 0.07319952774498228
-# Acc for demo group Hispanic: 0.9193611987381703
 # FPR for demo group Hispanic: 0.10149253731343283
-# Acc for demo group Other: 0.9193611987381703
 # FPR for demo group Other: 0.011764705882352941
 
 

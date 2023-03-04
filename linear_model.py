@@ -72,25 +72,37 @@ def train():
 
     print(classification_report(y_dev, y_pred))
 
-    demo_set = load_demographic_dev_df()
-    x_demo = vectorizer.transform(demo_set['text']).toarray()
-    y_pred = model.predict(x_demo)
+    # FPR for each demo group
+    print('\nDEOMO GRUOPS')
+    demo_set = preprocess_text(load_demographic_dev_df())
 
-    fp = y_pred.sum()
-    tn = len(y_pred) - fp
-    print('FPR:', fp / (fp + tn))
+    demo_groups = ['AA', 'White', 'Hispanic', 'Other']
+    for demo in demo_groups:
+        d = demo_set[demo_set['demographic'] == demo]
+
+        x_demo = vectorizer.transform(d['text']).toarray()
+        y_pred = model.predict(x_demo)
+
+        fp = y_pred.sum()
+        tn = len(y_pred) - fp
+        print(f'FPR for demo group {demo}: {fp / (fp + tn)}')
 
     """
                       precision    recall  f1-score   support
     
                0       0.78      0.89      0.83       884
-               1       0.69      0.50      0.58       440
+               1       0.69      0.49      0.58       440
     
         accuracy                           0.76      1324
-       macro avg       0.74      0.70      0.71      1324
+       macro avg       0.74      0.69      0.70      1324
     weighted avg       0.75      0.76      0.75      1324
     
-    FPR: 0.10173501577287067
+    
+    DEOMO GRUOPS
+    FPR for demo group AA: 0.22289156626506024
+    FPR for demo group White: 0.10011806375442739
+    FPR for demo group Hispanic: 0.11641791044776119
+    FPR for demo group Other: 0.0058823529411764705
     """
 
 

@@ -51,7 +51,6 @@ def tokenize_dataset(data: Dataset, tokenizer):
 def main():
     train_set = df2dataset(load_train_df())
     dev_set = df2dataset(load_dev_df())
-    demo_set = df2dataset(load_demographic_dev_df())
 
     tokenizer = AutoTokenizer.from_pretrained("roberta-base")
     model = RobertaForSequenceClassification.from_pretrained(
@@ -59,12 +58,8 @@ def main():
         num_labels=2,
     ).to('cuda')
 
-    if args.train:
-        train_set = tokenize_dataset(train_set, tokenizer)
-    else:
-        train_set = None
+    train_set = tokenize_dataset(train_set, tokenizer)
     dev_set = tokenize_dataset(dev_set, tokenizer)
-    demo_set = tokenize_dataset(demo_set, tokenizer)
 
     collator = DataCollatorWithPadding(tokenizer=tokenizer, padding=True)
 
@@ -101,30 +96,44 @@ def main():
     )
 
     trainer.train()
-    # {'eval_loss': 0.45169317722320557, 'eval_accuracy': 0.7930513595166163, 'epoch': 1.0}
 
     y_pred = trainer.predict(dev_set).predictions.argmax(axis=-1)
 
     y_dev = dev_set['label']
     print(f'\nDEV SET:\n{classification_report(y_dev, y_pred)}')
 
-    y_demo_pred = trainer.predict(demo_set).predictions.argmax(axis=-1)
+    # FPR for each demo group
+    print('\nDEOMO GRUOPS')
+    demo_set = load_demographic_dev_df()
 
-    fp = y_demo_pred.sum()
-    tn = len(y_demo_pred) - fp
-    print(f'FPR: {fp / (fp + tn)}')
+    demo_groups = ['AA', 'White', 'Hispanic', 'Other']
+    for demo in demo_groups:
+        d = demo_set[demo_set['demographic'] == demo]
+        d = tokenize_dataset(df2dataset(d), tokenizer)
+
+        y_pred = trainer.predict(d).predictions.argmax(axis=-1)
+
+        fp = y_pred.sum()
+        tn = len(y_pred) - fp
+        print(f'FPR for demo group {demo}: {fp / (fp + tn)}')
+
     """
     DEV SET:
                   precision    recall  f1-score   support
-
+    
                0       0.83      0.87      0.85       884
-               1       0.71      0.65      0.68       440
-
-        accuracy                           0.80      1324
-       macro avg       0.77      0.76      0.76      1324
-    weighted avg       0.79      0.80      0.79      1324
-
-    FPR: 0.1474763406940063
+               1       0.71      0.64      0.67       440
+    
+        accuracy                           0.79      1324
+       macro avg       0.77      0.75      0.76      1324
+    weighted avg       0.79      0.79      0.79      1324
+    
+    
+    DEOMO GRUOPS
+    FPR for demo group AA: 0.2560240963855422
+    FPR for demo group White: 0.13907910271546636
+    FPR for demo group Hispanic: 0.16119402985074627
+    FPR for demo group Other: 0.0058823529411764705
     """
 
 
