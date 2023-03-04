@@ -90,13 +90,102 @@
 }
 
 @article{scikit-learn,
-    title={Scikit-learn: Machine Learning in {P}ython},
-    author={Pedregosa, F. and Varoquaux, G. and Gramfort, A. and Michel, V.
-         and Thirion, B. and Grisel, O. and Blondel, M. and Prettenhofer, P.
-         and Weiss, R. and Dubourg, V. and Vanderplas, J. and Passos, A. and
-         Cournapeau, D. and Brucher, M. and Perrot, M. and Duchesnay, E.},
-    journal={Journal of Machine Learning Research},
-    volume={12},
-    pages={2825--2830},
-    year={2011}
+    title = {Scikit-learn: Machine Learning in {P}ython},
+    author = {Pedregosa, F. and Varoquaux, G. and Gramfort, A. and Michel, V.
+ and Thirion, B. and Grisel, O. and Blondel, M. and Prettenhofer, P.
+ and Weiss, R. and Dubourg, V. and Vanderplas, J. and Passos, A. and
+ Cournapeau, D. and Brucher, M. and Perrot, M. and Duchesnay, E.},
+    journal = {Journal of Machine Learning Research},
+    volume = {12},
+    pages = {2825--2830},
+    year = {2011}
+}
+
+@article{huggingface,
+    author = {Thomas Wolf and
+ Lysandre Debut and
+ Victor Sanh and
+ Julien Chaumond and
+ Clement Delangue and
+ Anthony Moi and
+ Pierric Cistac and
+ Tim Rault and
+ R{\'{e}}mi Louf and
+ Morgan Funtowicz and
+ Jamie Brew},
+    title = {HuggingFace's Transformers: State-of-the-art Natural Language Processing},
+    journal = {CoRR},
+    volume = {abs/1910.03771},
+    year = {2019},
+    url = {http://arxiv.org/abs/1910.03771},
+    eprinttype = {arXiv},
+    eprint = {1910.03771},
+    timestamp = {Tue, 02 Jun 2020 12:49:01 +0200},
+    biburl = {https://dblp.org/rec/journals/corr/abs-1910-03771.bib},
+    bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{adamw,
+    author = {Ilya Loshchilov and
+ Frank Hutter},
+    title = {Fixing Weight Decay Regularization in Adam},
+    journal = {CoRR},
+    volume = {abs/1711.05101},
+    year = {2017},
+    url = {http://arxiv.org/abs/1711.05101},
+    eprinttype = {arXiv},
+    eprint = {1711.05101},
+    timestamp = {Mon, 13 Aug 2018 16:48:18 +0200},
+    biburl = {https://dblp.org/rec/journals/corr/abs-1711-05101.bib},
+    bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{xuhuizhou2021,
+    author = {Xuhui Zhou and
+ Maarten Sap and
+ Swabha Swayamdipta and
+ Noah A. Smith and
+ Yejin Choi},
+    title = {Challenges in Automated Debiasing for Toxic Language Detection},
+    journal = {CoRR},
+    volume = {abs/2102.00086},
+    year = {2021},
+    url = {https://arxiv.org/abs/2102.00086},
+    eprinttype = {arXiv},
+    eprint = {2102.00086},
+    timestamp = {Tue, 09 Feb 2021 13:35:56 +0100},
+    biburl = {https://dblp.org/rec/journals/corr/abs-2102-00086.bib},
+    bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@inproceedings{fortuna2022,
+    title = "Directions for {NLP} Practices Applied to Online Hate Speech Detection",
+    author = "Fortuna, Paula  and
+      Dominguez, Monica  and
+      Wanner, Leo  and
+      Talat, Zeerak",
+    booktitle = "Proceedings of the 2022 Conference on Empirical Methods in Natural Language Processing",
+    month = dec,
+    year = "2022",
+    address = "Abu Dhabi, United Arab Emirates",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2022.emnlp-main.809",
+    pages = "11794--11805",
+    abstract = "Addressing hate speech in online spaces has been conceptualized as a classification task that uses Natural Language Processing (NLP) techniques. Through this conceptualization, the hate speech detection task has relied on common conventions and practices from NLP. For instance, inter-annotator agreement is conceptualized as a way to measure dataset quality and certain metrics and benchmarks are used to assure model generalization. However, hate speech is a deeply complex and situated concept that eludes such static and disembodied practices. In this position paper, we critically reflect on these methodologies for hate speech detection, we argue that many conventions in NLP are poorly suited for the problem and encourage researchers to develop methods that are more appropriate for the task.",
+}
+
+@inproceedings{clark2019,
+    title = "Don{'}t Take the Easy Way Out: Ensemble Based Methods for Avoiding Known Dataset Biases",
+    author = "Clark, Christopher  and
+      Yatskar, Mark  and
+      Zettlemoyer, Luke",
+    booktitle = "Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing (EMNLP-IJCNLP)",
+    month = nov,
+    year = "2019",
+    address = "Hong Kong, China",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/D19-1418",
+    doi = "10.18653/v1/D19-1418",
+    pages = "4069--4082",
+    abstract = "State-of-the-art models often make use of superficial patterns in the data that do not generalize well to out-of-domain or adversarial settings. For example, textual entailment models often learn that particular key words imply entailment, irrespective of context, and visual question answering models learn to predict prototypical answers, without considering evidence in the image. In this paper, we show that if we have prior knowledge of such biases, we can train a model to be more robust to domain shift. Our method has two stages: we (1) train a naive model that makes predictions exclusively based on dataset biases, and (2) train a robust model as part of an ensemble with the naive one in order to encourage it to focus on other patterns in the data that are more likely to generalize. Experiments on five datasets with out-of-domain test sets show significantly improved robustness in all settings, including a 12 point gain on a changing priors visual question answering dataset and a 9 point gain on an adversarial question answering test set.",
 }

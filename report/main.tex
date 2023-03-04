@@ -55,60 +55,36 @@
 
     We first use PerspectiveAPI to build a rule-based classifier.
     Perspective score represents the toxicity level of a piece of text.
-    The classifier recognize a sentence as offensive if its Perspective score is larger than $0.8$.
+    The classifier recognizes a sentence as offensive if its Perspective score is larger than $0.8$.
 
     \subsection{Linear Classifier using Word Count Vectors}
 
     The second baseline model is a linear classifier using word count feature vectors.
-    The model can recognize offensive words in text, but may fail in other situations.
+    The model can recognize offensive words in text but may fail in other situations.
 
     \subsection{RoBERTa Sentence Classifier}
 
     The third classifier is built on top of the RoBERTa~\cite{roberta}.
+    The model is appended with a linear layer that transforms the first token prediction to a binary label prediction,
+    with $1$ indicating toxic speech and $0$ meaning non-toxic speech.
     There are several advantages of using RoBERTa.
-    Its text tokenizer uses binary pair encoding (BPE)~\cite{BPE}, which means the model utilize unicode characters such as
-    emojis to perform classification.
+    Its text tokenizer uses binary pair encoding (BPE)~\cite{BPE}, which means the model utilizes Unicode characters
+    such as emojis to perform classification.
     As a language model, RoBERTa recognizes contextual text information which should in theory improve the
     classification performance on hard cases.
-    The model is also pre-trained on a large amount of data, so we only need finetune it for a small number
+    The model is also pre-trained on a large amount of data, so we only need to finetune it for a small number
     of iterations.
 
-
-    \section{Experiments}
-
-    For all three classifiers, we report their F1 score, precision, recall, and accuracy on the development set of
-    SemEval2019 data.
-    And we present their false-positive rate (FPR) on TwitterAAE data average across all demographic groups.
-
-    \subsection{Linear Classifier}
-
-    For the linear classifier, we clean the text before extracting word count features.
-    We use \texttt{spaCy}~\cite{spacy} \texttt{en\_core\_web\_sm} model to tokenize raw strings into
-    lists of lower-case words and remove all punctuations.
-    Then we use \texttt{Ekphrasis}~\cite{ekphrasis} library to normalize the text.
-    \texttt{Ekphrasis} specializes in processing social media text which contains typos, urls, emojis and so on.
-    We use it to normalize such components, unpack hashtags, fix elongated words, and convert emoticons to text.
-    Finally, we use \texttt{sklearn}~\cite{scikit-learn} \texttt{CountVectorizer} to convert text into word count
-    vectors.
-
-    \subsection{RoBERTa Sentence Classifier}
-
-    For the RoBERTa classifier, we feed the text directly to the tokenizer and rely on the model to handle special
-    text components mentioned in the previous section.
-
-
-    \section{Results and Discussion}
-
-    \begin{table*}
+    \begin{table*}[t]
         \small
         \centering
-        \begin{tabular}{lccccc}
+        \begin{tabular}{lcccccccc}
             \hline
-            Model       & Accuracy & F1 & Precision & Recall & FPR (Demo) \\
+            Model       & Accuracy & F1     & Precision & Recall & FPR AA & FPR White & Hispanic & Other  \\
             \hline
-            Perspective &          &    &           &        &            \\\hline
-            Linear      &          &    &           &        &            \\\hline
-            RoBERTa     &          &    &           &        &            \\\hline
+            Perspective & $0.76$   & $0.67$ & $0.82$    & $0.66$ & $0.20$ & $0.07$    & $0.10$   & $0.01$ \\\hline
+            Linear      & $0.76$   & $0.70$ & $0.74$    & $0.69$ & $0.22$ & $0.10$    & $0.12$   & $0.01$ \\\hline
+            RoBERTa     & $0.79$   & $0.76$ & $0.77$    & $0.75$ & $0.26$ & $0.14$    & $0.16$   & $0.01$ \\\hline
         \end{tabular}
 
         \caption{Results of three classifiers.}
@@ -116,9 +92,92 @@
     \end{table*}
 
 
+    \section{Experiments}
+
+    For all three classifiers, we train them using the train set of SemEval2019 and report their F1 score,
+    precision, recall, and accuracy on the development set.
+    We also present their false-positive rate (FPR) on TwitterAAE data for each demographic group.
+    This FPR can be an indicator of the level of bias learned from the data.
+
+    \subsection{Linear Classifier}
+
+    For the linear classifier, we clean the text before extracting word count features.
+    We use \texttt{spaCy}~\cite{spacy} \texttt{en\_core\_web\_sm} model to tokenize raw strings into
+    lists of lower-case words and remove all punctuations.
+    Then we use \texttt{Ekphrasis}~\cite{ekphrasis} library to normalize the text.
+    \texttt{Ekphrasis} specializes in processing social media text which contains typos, URLs, emojis, and so on.
+    We use it to normalize such components, unpack hashtags, fix elongated words, and convert emoticons to text.
+    Finally, we use \texttt{sklearn}~\cite{scikit-learn} \texttt{CountVectorizer} to convert text into word count
+    vectors.
+    Additionally, both L1 and L2 regularization are used to avoid overfitting the training data.
+
+    \begin{table*}[h]
+        \small
+        \centering
+        \begin{tabular}{lcccccc}
+            \hline
+            Model       & F1 (non-toxic) & F1 (toxic) & Precision (non-toxic) & Precision (toxic) & Recall (non-toxic) & Recall (toxic)  \\
+            \hline
+            Perspective & $0.85$         & $0.49$     & $0.75$                & $0.89$            & $0.98$             & $0.33$         \\\hline
+            Linear      & $0.83$         & $0.58$     & $0.78$                & $0.69$            & $0.89$             & $0.49$         \\\hline
+            RoBERTa     & $0.85$         & $0.67$     & $0.83$                & $0.71$            & $0.87$             & $0.64$         \\\hline
+        \end{tabular}
+
+        \caption{Results of three classifiers.}
+        \label{tab:results_detail}
+    \end{table*}
+
+    \subsection{RoBERTa Sentence Classifier}
+
+    For the RoBERTa classifier, we feed the text directly to the tokenizer and rely on the tokenizer and the model
+    to handle special text components mentioned in the previous section.
+    We use Huggingface's \texttt{transformers} library~\cite{huggingface} to load a pre-train RoBERTa model and
+    finetune it for one epoch.
+    We set the batch size to $28$, learning rate to $10^{-5}$, and weight decay of the AdamW optimizer~\cite{adamw}
+    to $0.01$.
+
+
+    \section{Results and Discussion}
+
+    Table~\ref{tab:results} shows that the best-performing classifier is RoBERTa, as it has the highest
+    F1 score and recall.
+    However, the Perspective model has the highest precision.
+    Note that the performance gap between RoBERTa and the other two classifiers is not big.
+    With such a big increase in the number of trainable parameters but a small performance increase
+    compared the linear classifier, it is likely that the model is learning only on a surface level.
+    The RoBERTa model is also the most biased model as it has the highest FPR in almost all demographic groups,
+    particularly in African Americans.
+    Meanwhile, the Perspective model is the least biased.
+
+    Table~\ref{tab:results_detail} shows the F1 score, precision, and recall of the classifiers on
+    toxic and non-toxic text separately.
+    The Perspective model has the highest recall of non-toxic speech but the worst recall of toxic speech, as
+    a result of being the least biased model.
+    On the contrary, the RoBERTa model has the biggest increase in its recall of toxic content,
+    implying the potential of BERT-based models in toxic speech detection.
+
+    A drawback of the linear classifier is shown by its low precision of toxic speech.
+    For example, having curse words in a sentence does not necessarily express toxic intent.
+    It could be a joke instead.
+    The linear classifier can be easily misled in such cases.
+
+    Our results show the potential of using machine learning to combat abusive language.
+    However, it is equally important to mitigate the biases learned by the model.
+    As shown in Table~\ref{tab:results}, the FPR in African American demographic group is higher than any other group.
+    This phenomenon has also been discovered in other studies~\cite{xuhuizhou2021}
+    It is not acceptable for such a model to be deployed in real products and incorrectly classify content
+    made by a particular demographic group as harmful content.
+    In addition, it is hard to define offensive language~\cite{fortuna2022}.
+    As shown in the result of the linear classifier, harmful language does not equal bad words.
+    Finally, biases in data collection and annotation should be taken into consideration when developing new debiasing
+    methods~\cite{clark2019}.
+
+
     \section{Conclusion}
 
-    In this report, we have created three toxic speech classifiers and analyzed their performance and biases.
+    In this report, we create three toxic speech classifiers and analyze their performance and biases.
+    Our experiment results show that the best-performing model is also the most biased model.
+    Therefore, debiasing techniques are needed to build a fair toxic speech detection model.
 
     \clearpage
     \bibliography{anthology,custom}

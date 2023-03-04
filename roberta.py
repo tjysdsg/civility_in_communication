@@ -136,6 +136,9 @@ def main():
     FPR for demo group Other: 0.0058823529411764705
     """
 
+    test_set = tokenize_dataset(df2dataset(load_test_df()), tokenizer)
+    y_pred = trainer.predict(d).predictions.argmax(axis=-1)
+
 
 if __name__ == '__main__':
     main()
