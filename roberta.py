@@ -6,16 +6,11 @@ from transformers import AutoTokenizer, RobertaForSequenceClassification, DataCo
     Trainer
 import numpy as np
 from sklearn.metrics import classification_report
+
+
 # from ekphrasis.classes.preprocessor import TextPreProcessor
 # from ekphrasis.classes.tokenizer import SocialTokenizer
 # from ekphrasis.dicts.emoticons import emoticons
-
-
-def get_args():
-    from argparse import ArgumentParser
-    parser = ArgumentParser()
-    parser.add_argument('--train', action='store_true')
-    return parser.parse_args()
 
 
 # https://github.com/cbaziotis/ekphrasis
@@ -54,8 +49,6 @@ def tokenize_dataset(data: Dataset, tokenizer):
 
 
 def main():
-    args = get_args()
-
     train_set = df2dataset(load_train_df())
     dev_set = df2dataset(load_dev_df())
     demo_set = df2dataset(load_demographic_dev_df())
@@ -107,19 +100,32 @@ def main():
         compute_metrics=compute_metrics,
     )
 
-    if args.train:
-        trainer.train()
-    else:
-        y_pred = trainer.predict(dev_set).predictions.argmax(axis=-1)
+    trainer.train()
+    # {'eval_loss': 0.45169317722320557, 'eval_accuracy': 0.7930513595166163, 'epoch': 1.0}
 
-        y_dev = dev_set['label']
-        print(f'\nDEV SET:\n{classification_report(y_dev, y_pred)}')
+    y_pred = trainer.predict(dev_set).predictions.argmax(axis=-1)
 
-        y_demo_pred = trainer.predict(demo_set).predictions.argmax(axis=-1)
+    y_dev = dev_set['label']
+    print(f'\nDEV SET:\n{classification_report(y_dev, y_pred)}')
 
-        fp = y_demo_pred.sum()
-        tn = len(y_demo_pred) - fp
-        print(f'FPR: {fp / (fp + tn)}')
+    y_demo_pred = trainer.predict(demo_set).predictions.argmax(axis=-1)
+
+    fp = y_demo_pred.sum()
+    tn = len(y_demo_pred) - fp
+    print(f'FPR: {fp / (fp + tn)}')
+    """
+    DEV SET:
+                  precision    recall  f1-score   support
+
+               0       0.83      0.87      0.85       884
+               1       0.71      0.65      0.68       440
+
+        accuracy                           0.80      1324
+       macro avg       0.77      0.76      0.76      1324
+    weighted avg       0.79      0.80      0.79      1324
+
+    FPR: 0.1474763406940063
+    """
 
 
 if __name__ == '__main__':
