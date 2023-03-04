@@ -136,8 +136,13 @@ def main():
     FPR for demo group Other: 0.0058823529411764705
     """
 
-    test_set = tokenize_dataset(df2dataset(load_test_df()), tokenizer)
-    y_pred = trainer.predict(d).predictions.argmax(axis=-1)
+    # write test predictions
+    test_set = load_test_df()
+    y_pred = trainer.predict(tokenize_dataset(df2dataset(load_test_df()), tokenizer)).predictions.argmax(axis=-1)
+
+    test_set['prediction'] = y_pred
+    test_set = test_set[['text', 'prediction']]
+    test_set.to_csv('Jiyang_Tang_advanced.tsv', sep='\t', header=True)
 
 
 if __name__ == '__main__':

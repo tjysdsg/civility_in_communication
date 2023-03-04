@@ -1,6 +1,6 @@
 import pandas as pd
 import spacy
-from data import load_train_df, load_dev_df, load_demographic_dev_df
+from data import load_train_df, load_dev_df, load_test_df, load_demographic_dev_df
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.metrics import classification_report
 from sklearn.linear_model import LogisticRegression, SGDClassifier
@@ -104,6 +104,14 @@ def train():
     FPR for demo group Hispanic: 0.11641791044776119
     FPR for demo group Other: 0.0058823529411764705
     """
+
+    # write test predictions
+    test_set = preprocess_text(load_test_df())
+    x_test = vectorizer.transform(test_set['text']).toarray()
+    y_pred = model.predict(x_test)
+    test_set['prediction'] = y_pred
+    test_set = test_set[['text', 'prediction']]
+    test_set.to_csv('Jiyang_Tang_test.tsv', sep='\t', header=True)
 
 
 def main():
